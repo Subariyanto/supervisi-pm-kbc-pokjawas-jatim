@@ -1646,6 +1646,21 @@ ra.forEach(function(m){if(!seen[m.nama]){all=all.concat([m]);seen[m.nama]=true;}
 return all;
 }
 // Ambil tahun ajaran dari data input (tahunAjaran atau tanggal); untuk cetak laporan
+function getMadrasahByJenjang(jenjang){
+if(jenjang==='RA'){
+var ra=[];try{ra=JSON.parse(localStorage.getItem(MADRASAH_KEY_RA))||[];}catch(e){}
+if(isScopedMode()){var n=getKMMadrasahNama();ra=ra.filter(function(m){return m.nama===n;});}
+return ra;
+}
+return getMadrasah();
+}
+function updateMadrasahByJenjang(selId,jenjang){
+var sel=document.getElementById(selId);if(!sel)return;
+var list=getMadrasahByJenjang(jenjang);
+var opts=list.length===0?'<option value="">-- Belum ada data madrasah'+(jenjang==='RA'?' RA':'')+' --</option>':'<option value="">-- Pilih Madrasah --</option>';
+list.forEach(function(m){opts+='<option value="'+escHtml(m.nama)+'">'+escHtml(m.nama)+'</option>';});
+sel.innerHTML=opts;
+}
 function getTahunFromEntries(entries){
 var latestTA='',latestDate='';
 (entries||[]).forEach(function(d){
@@ -3235,7 +3250,7 @@ return html;
 }
 
 function showAddKokurikuler(){
-var madrasahList=getMadrasahForPenilaian();
+var madrasahList=getMadrasahByJenjang('umum');
 var opts='<option value="">-- Pilih Madrasah --</option>';
 madrasahList.forEach(function(m){opts+='<option value="'+escHtml(m.nama)+'">'+escHtml(m.nama)+'</option>';});
 var modal='<div class="modal-overlay" style="display:flex" onclick="if(event.target===this)closeKokurikulerModal()">';
@@ -3243,6 +3258,7 @@ modal+='<div class="modal"><h3>Tambah Penilaian Kokurikuler</h3>';
 if(isKM()){
 modal+='<div class="form-group"><label>Madrasah (dari akun, terkunci)</label><input type="text" id="kok-madrasah" value="'+escHtml(getKMMadrasahNama()||'')+'" readonly style="background:#f1f5f9;cursor:not-allowed"></div>';
 }else{
+modal+='<div class="form-group"><label>Jenjang</label><select id="kok-jenjang" onchange="updateMadrasahByJenjang(\'kok-madrasah\',this.value)"><option value="umum">MI / MTs / MA</option><option value="RA">RA (Raudhatul Athfal)</option></select></div>';
 modal+='<div class="form-group"><label>Madrasah</label><select id="kok-madrasah">'+opts+'</select></div>';
 }
 modal+='<div class="form-group"><label>Tanggal</label><input type="date" id="kok-tanggal"></div>';
@@ -3616,7 +3632,7 @@ return html;
 }
 
 function showAddEkstrakurikuler(){
-var madrasahList=getMadrasahForPenilaian();
+var madrasahList=getMadrasahByJenjang('umum');
 var html='<div style="background:rgba(0,0,0,.5);position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;display:flex;align-items:center;justify-content:center" id="modal-ekstra">';
 html+='<div style="background:#fff;border-radius:12px;padding:30px;max-width:400px;width:90%">';
 html+='<h3 style="margin-bottom:15px">Tambah Penilaian Ekstrakurikuler</h3>';
@@ -3626,6 +3642,9 @@ else{madSelect='<select id="ekstra-madrasah" style="width:100%;padding:8px;margi
 if(madrasahList.length===0){madSelect+='<option value="">-- Belum ada data madrasah --</option>';}
 else{madrasahList.forEach(function(m){madSelect+='<option value="'+escHtml(m.nama)+'">'+escHtml(m.nama)+'</option>';});}
 madSelect+='</select>';}
+if(!isKM()){
+html+='<label>Jenjang:</label><select id="ekstra-jenjang" onchange="updateMadrasahByJenjang(\'ekstra-madrasah\',this.value)" style="width:100%;padding:8px;margin:5px 0 15px;border-radius:6px;border:1px solid #ddd"><option value="umum">MI / MTs / MA</option><option value="RA">RA (Raudhatul Athfal)</option></select>';
+}
 html+='<label>Madrasah'+(isKM()?' (dari akun, terkunci)':'')+':</label>'+madSelect;
 html+='<label>Tanggal:</label><input type="date" id="ekstra-tanggal" style="width:100%;padding:8px;margin:5px 0 15px;border-radius:6px;border:1px solid #ddd">';
 html+='<div style="text-align:right"><button class="btn btn-secondary" onclick="document.getElementById(\'modal-ekstra\').remove()">Batal</button> ';
@@ -3987,7 +4006,7 @@ html+='<div class="no-print" style="margin-top:20px;text-align:right"><button cl
 return html;
 }
 function showAddIklimMadrasah(){
-var madrasahList=getMadrasahForPenilaian();
+var madrasahList=getMadrasahByJenjang('umum');
 var html='<div style="background:rgba(0,0,0,.5);position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;display:flex;align-items:center;justify-content:center" id="modal-iklim">';
 html+='<div style="background:#fff;border-radius:12px;padding:30px;max-width:400px;width:90%">';
 html+='<h3 style="margin-bottom:15px">Tambah Penilaian Iklim Madrasah</h3>';
@@ -3997,6 +4016,9 @@ else{madSelect='<select id="iklim-madrasah" style="width:100%;padding:8px;margin
 if(madrasahList.length===0){madSelect+='<option value="">-- Belum ada data madrasah --</option>';}
 else{madrasahList.forEach(function(m){madSelect+='<option value="'+escHtml(m.nama)+'">'+escHtml(m.nama)+'</option>';});}
 madSelect+='</select>';}
+if(!isKM()){
+html+='<label>Jenjang:</label><select id="iklim-jenjang" onchange="updateMadrasahByJenjang(\'iklim-madrasah\',this.value)" style="width:100%;padding:8px;margin:5px 0 15px;border-radius:6px;border:1px solid #ddd"><option value="umum">MI / MTs / MA</option><option value="RA">RA (Raudhatul Athfal)</option></select>';
+}
 html+='<label>Madrasah'+(isKM()?' (dari akun, terkunci)':'')+':</label>'+madSelect;
 html+='<label>Tanggal:</label><input type="date" id="iklim-tanggal" style="width:100%;padding:8px;margin:5px 0 15px;border-radius:6px;border:1px solid #ddd">';
 html+='<div style="text-align:right"><button class="btn btn-secondary" onclick="document.getElementById(\'modal-iklim\').remove()">Batal</button> ';
