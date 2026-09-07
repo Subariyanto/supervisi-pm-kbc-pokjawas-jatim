@@ -1635,6 +1635,16 @@ function getScopedData(){return getData();}
 function getScopedKokurikuler(){return isScopedMode()?[]:getKokurikuler();}
 function getScopedEkstrakurikuler(){return isScopedMode()?[]:getEkstrakurikuler();}
 function getScopedIklimMadrasah(){return isScopedMode()?[]:getIklimMadrasah();}
+// Dropdown penilaian kokurikuler/ekstra/iklim: gabung madrasah umum + RA
+function getMadrasahForPenilaian(){
+var all=rawGetMadrasah();
+if(isScopedMode()){var n=getKMMadrasahNama();all=all.filter(function(m){return m.nama===n;});}
+try{var ra=JSON.parse(localStorage.getItem(MADRASAH_KEY_RA))||[];
+if(isScopedMode()){var n2=getKMMadrasahNama();ra=ra.filter(function(m){return m.nama===n2;});}
+var seen={};all.forEach(function(m){seen[m.nama]=true;});
+ra.forEach(function(m){if(!seen[m.nama]){all=all.concat([m]);seen[m.nama]=true;}});}catch(e){}
+return all;
+}
 function getPengawas(){try{return JSON.parse(localStorage.getItem(PENGAWAS_KEY))||{}}catch(e){return{}}}
 function savePengawas(d){localStorage.setItem(PENGAWAS_KEY,JSON.stringify(d))}
 
@@ -3206,7 +3216,7 @@ return html;
 }
 
 function showAddKokurikuler(){
-var madrasahList=getMadrasah();
+var madrasahList=getMadrasahForPenilaian();
 var opts='<option value="">-- Pilih Madrasah --</option>';
 madrasahList.forEach(function(m){opts+='<option value="'+escHtml(m.nama)+'">'+escHtml(m.nama)+'</option>';});
 var modal='<div class="modal-overlay" style="display:flex" onclick="if(event.target===this)closeKokurikulerModal()">';
@@ -3492,7 +3502,7 @@ var data=getKokurikuler();
 var d=data[idx];
 if(!d)return;
 var pengawas=getPengawas();
-var madrasahList=getMadrasah();
+var madrasahList=getMadrasahForPenilaian();
 var madrasahData=madrasahList.find(function(m){return m.nama===d.madrasahNama})||{};
 var w=window.open('','_blank');
 var html='<html><head><title>Cetak Instrumen Kokurikuler</title><style>';
@@ -3587,7 +3597,7 @@ return html;
 }
 
 function showAddEkstrakurikuler(){
-var madrasahList=getMadrasah();
+var madrasahList=getMadrasahForPenilaian();
 var html='<div style="background:rgba(0,0,0,.5);position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;display:flex;align-items:center;justify-content:center" id="modal-ekstra">';
 html+='<div style="background:#fff;border-radius:12px;padding:30px;max-width:400px;width:90%">';
 html+='<h3 style="margin-bottom:15px">Tambah Penilaian Ekstrakurikuler</h3>';
@@ -3834,7 +3844,7 @@ var data=getEkstrakurikuler();
 var d=data[idx];
 if(!d)return;
 var pengawas=getPengawas();
-var madrasahList=getMadrasah();
+var madrasahList=getMadrasahForPenilaian();
 var madrasahData=madrasahList.find(function(m){return m.nama===d.madrasahNama})||{};
 var w=window.open('','_blank');
 var html='<html><head><title>Cetak Instrumen Ekstrakurikuler</title><style>';
@@ -3958,7 +3968,7 @@ html+='<div class="no-print" style="margin-top:20px;text-align:right"><button cl
 return html;
 }
 function showAddIklimMadrasah(){
-var madrasahList=getMadrasah();
+var madrasahList=getMadrasahForPenilaian();
 var html='<div style="background:rgba(0,0,0,.5);position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;display:flex;align-items:center;justify-content:center" id="modal-iklim">';
 html+='<div style="background:#fff;border-radius:12px;padding:30px;max-width:400px;width:90%">';
 html+='<h3 style="margin-bottom:15px">Tambah Penilaian Iklim Madrasah</h3>';
@@ -4198,7 +4208,7 @@ var data=getIklimMadrasah();
 var d=data[idx];
 if(!d)return;
 var pengawas=getPengawas();
-var madrasahList=getMadrasah();
+var madrasahList=getMadrasahForPenilaian();
 var madrasahData=madrasahList.find(function(m){return m.nama===d.madrasahNama})||{};
 var w=window.open('','_blank');
 var html='<html><head><title>Cetak Instrumen Iklim Madrasah</title><style>';
@@ -4938,7 +4948,7 @@ return matchTahun&&matchSem&&matchMad;
 });
 if(data.length===0){alert('Tidak ada data supervisi pembelajaran untuk filter ini.');return;}
 var pengawas=getPengawas();
-var madList=getMadrasah();
+var madList=getMadrasahForPenilaian();
 var madrasahObj=madrasahObj; // noop
 var w=window.open('','_blank');
 var html='<html><head><title>Laporan Supervisi Pembelajaran</title><style>';
@@ -5065,7 +5075,7 @@ var koD=ko.filter(fitData);var ekD=ek.filter(fitData);var ikD=ik.filter(fitData)
 var total=koD.length+ekD.length+ikD.length;
 if(total===0){alert('Tidak ada data pendampingan (kokurikuler/ekstra/iklim) untuk filter ini.');return;}
 var pengawas=getPengawas();
-var madList=getMadrasah();
+var madList=getMadrasahForPenilaian();
 var koLen=KOKURIKULER.length;var ekLen=EKSTRAKURIKULER.length;var ikLen=IKLIM_MADRASAH.length;
 function pctFor(d,len){var sc=d.scores||[];var sum=0,max=len*4;for(var i=0;i<len;i++){if(sc[i]!==null&&sc[i]!==undefined)sum+=sc[i]+1;}return max>0?(sum/max)*100:0;}
 function avg(arr,len){if(arr.length===0)return 0;var t=0;arr.forEach(function(d){t+=pctFor(d,len);});return t/arr.length;}
@@ -5214,7 +5224,7 @@ return html;
 function cetakLaporanKokurikuler(){
 var data=getKokurikuler();
 var pengawas=getPengawas();
-var madrasahList=getMadrasah();
+var madrasahList=getMadrasahForPenilaian();
 var firstMadrasah=madrasahList.length>0?madrasahList[0]:{};
 var totalPct=0;
 data.forEach(function(d){var sc=d.scores||[];var sum=sc.reduce(function(a,b){return a+((b!==null&&b!==undefined)?b+1:0)},0);var max=KOKURIKULER.length*4;totalPct+=max>0?(sum/max)*100:0});
@@ -5429,7 +5439,7 @@ return html;
 function cetakLaporanEkstrakurikuler(){
 var data=getEkstrakurikuler();
 var pengawas=getPengawas();
-var madrasahList=getMadrasah();
+var madrasahList=getMadrasahForPenilaian();
 var firstMadrasah=madrasahList.length>0?madrasahList[0]:{};
 var totalPct=0;
 data.forEach(function(d){var sc=d.scores||[];var sum=sc.reduce(function(a,b){return a+((b!==null&&b!==undefined)?b+1:0)},0);var max=EKSTRAKURIKULER.length*4;totalPct+=max>0?(sum/max)*100:0});
@@ -5644,7 +5654,7 @@ return html;
 function cetakLaporanIklimMadrasah(){
 var data=getIklimMadrasah();
 var pengawas=getPengawas();
-var madrasahList=getMadrasah();
+var madrasahList=getMadrasahForPenilaian();
 var firstMadrasah=madrasahList.length>0?madrasahList[0]:{};
 var totalPct=0;
 data.forEach(function(d){var sc=d.scores||[];var sum=sc.reduce(function(a,b){return a+((b!==null&&b!==undefined)?b+1:0)},0);var max=IKLIM_MADRASAH.length*4;totalPct+=max>0?(sum/max)*100:0});
@@ -5961,7 +5971,7 @@ var allData=getData();
 var data=allData.filter(function(d){return (d.madrasahNama||'(Tanpa Madrasah)')===mName;});
 if(data.length===0){alert('Tidak ada data untuk madrasah ini.');return;}
 var pengawas=getPengawas();
-var madrasahList=getMadrasah();
+var madrasahList=getMadrasahForPenilaian();
 var madrasahObj=madrasahList.find(function(m){return m.nama===mName;})||{nama:mName};
 var totalPct=0;
 data.forEach(function(d){totalPct+=calcScorePct(d.scores||[],INDIKATOR.length)});
@@ -6079,7 +6089,7 @@ var data=getData();
 if(data.length===0){alert('Tidak ada data.');return;}
 var pengawas=getPengawas();
 var kkma=pengawas.tempatTugas||'KKMA';
-var madrasahList=getMadrasah();
+var madrasahList=getMadrasahForPenilaian();
 var totalPct=0;
 data.forEach(function(d){totalPct+=calcScorePct(d.scores||[],INDIKATOR.length)});
 var avgPct=data.length>0?(totalPct/data.length):0;
