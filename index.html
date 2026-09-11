@@ -332,6 +332,17 @@ function isKM(){return getCurrentRole()===ROLES.KM;}
 // Label kolom tanda tangan kanan mengikuti peran yang login (Kepala Madrasah saat login KM)
 function getSigRightLabel(){return isKM()?'Kepala Madrasah':'Pengawas Madrasah';}
 function getSigJabatan(p){return isKM()?'Kepala Madrasah':((p&&p.jabatan)||'Pengawas Madrasah');}
+function getTempatTanggalData(data,madrasahObj){
+var latest=null;var latestTg='';
+(data||[]).forEach(function(d){var id=(d&&d.identitas)||{};var tg=String(id.tanggalSupervisi||'').trim();if(tg&&tg>latestTg){latestTg=tg;latest=id;}});
+var tempat='';
+if(latest&&latest.kabupatenKota)tempat=String(latest.kabupatenKota).trim();
+if(!tempat&&madrasahObj&&madrasahObj.kabupaten)tempat=String(madrasahObj.kabupaten).trim();
+if(!tempat)tempat='Jember';
+tempat=tempat.replace(/^(Kabupaten|Kab.?|Kota)\s+/i,'');
+var tgl=latestTg?formatDateDMY(latestTg):getTempatTanggalCetak({}).split(', ')[1];
+return tempat+', '+tgl;
+}
 function getSigPerson(m){if(isKM()){var mm=m||{};var s=getSession();return{nama:mm.kepala||s.nama||'',nip:mm.nipKepala||''}}var p=getPengawas();return{nama:p.nama||'',nip:p.nip||''}}
 // Pengawas & Admin: akses penuh fitur supervisi + modul pengawas
 function isSupervisorLevel(){return isAdmin()||isPengawas();}
@@ -4368,6 +4379,7 @@ var pengawas=getPengawas();
 var madrasahList=getMadrasah();
 var madrasahObj=madrasahList.find(function(m){return m.nama===mName;})||{nama:mName};
 var sigP=getSigPerson(madrasahObj);
+var sigTTD=getTempatTanggalData(data,madrasahObj);
 var totalPct=0;var totalP=0;var totalL=0;var totalA=0;
 data.forEach(function(d){
 totalP+=calcKomponen(d,'perencanaan');
@@ -4427,7 +4439,7 @@ html+='<p>Laporan ini disusun sebagai bentuk pertanggungjawaban pelaksanaan supe
 html+='<p>Pelaksanaan supervisi difokuskan pada keterlaksanaan pembelajaran yang mendorong murid berpikir kritis, kreatif, kolaboratif, komunikatif, reflektif, serta mengintegrasikan nilai cinta kepada Tuhan, sesama, lingkungan, bangsa, dan ilmu pengetahuan dalam proses pembelajaran.</p>';
 html+='<p>Kami berharap laporan ini dapat menjadi bahan refleksi, penguatan mutu layanan pendidikan, serta dasar penyusunan tindak lanjut peningkatan kompetensi guru dan kualitas pembelajaran di madrasah.</p>';
 html+='<p>Demikian laporan ini disusun. Semoga bermanfaat bagi peningkatan mutu pendidikan di madrasah.</p>';
-html+='<div class="ttd" style="margin-top:20px"><p style="margin:0">..................., .................... 2026</p><p style="margin:0">Penyusun,</p><br><br><br><p style="margin:0"><b><u>'+(sigP.nama||'...........................')+'</u></b></p><p style="margin:0">NIP. '+(sigP.nip||'...........................')+'</p></div>';
+html+='<div class="ttd" style="margin-top:20px"><p style="margin:0">'+escHtml(sigTTD)+'</p><p style="margin:0">Penyusun,</p><br><br><br><p style="margin:0"><b><u>'+(sigP.nama||'...........................')+'</u></b></p><p style="margin:0">NIP. '+(sigP.nip||'...........................')+'</p></div>';
 html+='</div>';
 // DAFTAR ISI
 html+='<div class="page-break"></div>';
@@ -4549,7 +4561,7 @@ html+='<div style="page-break-inside:avoid"><h3>K. Penutup</h3>';
 html+='<p>Pelaksanaan supervisi pembelajaran di '+escHtml(madrasahObj.nama||mName)+' menunjukkan bahwa kegiatan ini memiliki peran penting dalam meningkatkan mutu proses belajar mengajar. Melalui supervisi, guru memperoleh bimbingan dan pendampingan yang konstruktif untuk memperkuat perencanaan, pelaksanaan, serta evaluasi pembelajaran.</p>';
 html+='<p>Demikian laporan supervisi ini disusun sebagai bentuk pertanggungjawaban sekaligus bahan evaluasi bersama.</p>';
 html+='<div class="ttd" style="margin-top:20px">';
-html+='<p style="margin:0">..................., .................... 2026</p>';
+html+='<p style="margin:0">'+escHtml(sigTTD)+'</p>';
 html+='<p style="margin:0">'+getSigRightLabel()+',</p>';
 html+='<br><br><br>';
 html+='<p style="margin:0"><b><u>'+(sigP.nama||'...........................')+'</u></b></p>';
@@ -4592,6 +4604,7 @@ var avgA=data.length>0?(totalA/data.length):0;
 var avgPct=data.length>0?(totalPct/data.length):0;
 var firstMadrasah=madrasahList.length>0?madrasahList[0]:{};
 var sigP=getSigPerson(firstMadrasah);
+var sigTTD=getTempatTanggalData(data,firstMadrasah);
 var coverInst=isKM()?(firstMadrasah.nama||''):(coverInst||'');
 var w=window.open('','_blank');
 var html='<html><head><title>Laporan Supervisi Pembelajaran</title><style>';
@@ -4643,7 +4656,7 @@ html+='<p>Laporan ini disusun sebagai bentuk pertanggungjawaban pelaksanaan supe
 html+='<p>Pelaksanaan supervisi difokuskan pada keterlaksanaan pembelajaran yang mendorong murid berpikir kritis, kreatif, kolaboratif, komunikatif, reflektif, serta mengintegrasikan nilai cinta kepada Tuhan, sesama, lingkungan, bangsa, dan ilmu pengetahuan dalam proses pembelajaran.</p>';
 html+='<p>Kami berharap laporan ini dapat menjadi bahan refleksi, penguatan mutu layanan pendidikan, serta dasar penyusunan tindak lanjut peningkatan kompetensi guru dan kualitas pembelajaran di madrasah.</p>';
 html+='<p>Demikian laporan ini disusun. Semoga bermanfaat bagi peningkatan mutu pendidikan di madrasah.</p>';
-html+='<div class="ttd" style="margin-top:20px"><p style="margin:0">..................., .................... 2026</p><p style="margin:0">Penyusun,</p><br><br><br><p style="margin:0"><b><u>'+(sigP.nama||'...........................')+'</u></b></p><p style="margin:0">NIP. '+(sigP.nip||'...........................')+'</p></div>';
+html+='<div class="ttd" style="margin-top:20px"><p style="margin:0">'+escHtml(sigTTD)+'</p><p style="margin:0">Penyusun,</p><br><br><br><p style="margin:0"><b><u>'+(sigP.nama||'...........................')+'</u></b></p><p style="margin:0">NIP. '+(sigP.nip||'...........................')+'</p></div>';
 html+='</div>';
 
 
@@ -4869,7 +4882,7 @@ html+='<p>Pelaksanaan supervisi pembelajaran yang telah dilakukan menunjukkan ba
 html+='<p>Hasil supervisi juga memperlihatkan bahwa guru pada umumnya telah menunjukkan kesungguhan dalam melaksanakan tugas, meskipun masih terdapat beberapa hal yang perlu ditingkatkan, terutama dalam aspek variasi metode, pemanfaatan media, asesmen proses, serta integrasi nilai-nilai kurikulum berbasis cinta dalam kegiatan pembelajaran. Oleh karena itu, tindak lanjut berupa pendampingan, pelatihan, dan monitoring berkelanjutan perlu terus dilakukan agar kualitas pembelajaran dapat semakin optimal.</p>';
 html+='<p>Demikian laporan supervisi ini disusun sebagai bentuk pertanggungjawaban sekaligus bahan evaluasi bersama bagi guru, kepala madrasah, dan pengawas. Besar harapan kami, hasil supervisi ini dapat memberikan kontribusi nyata dalam peningkatan mutu pendidikan, membentuk iklim belajar yang positif, dan menumbuhkan karakter peserta didik yang beriman, berilmu, berakhlak mulia, serta penuh cinta kasih.</p>';
 html+='<div class="ttd" style="margin-top:20px">';
-html+='<p style="margin:0">..................., .................... 2026</p>';
+html+='<p style="margin:0">'+escHtml(sigTTD)+'</p>';
 html+='<p style="margin:0">'+getSigRightLabel()+',</p>';
 html+='<br><br><br>';
 html+='<p style="margin:0"><b><u>'+(sigP.nama||'...........................')+'</u></b></p>';
