@@ -332,6 +332,7 @@ function isKM(){return getCurrentRole()===ROLES.KM;}
 // Label kolom tanda tangan kanan mengikuti peran yang login (Kepala Madrasah saat login KM)
 function getSigRightLabel(){return isKM()?'Kepala Madrasah':'Pengawas Madrasah';}
 function getSigJabatan(p){return isKM()?'Kepala Madrasah':((p&&p.jabatan)||'Pengawas Madrasah');}
+function getSigPerson(m){if(isKM()){var mm=m||{};var s=getSession();return{nama:mm.kepala||s.nama||'',nip:mm.nipKepala||''}}var p=getPengawas();return{nama:p.nama||'',nip:p.nip||''}}
 // Pengawas & Admin: akses penuh fitur supervisi + modul pengawas
 function isSupervisorLevel(){return isAdmin()||isPengawas();}
 
@@ -4366,6 +4367,7 @@ if(data.length===0){alert('Tidak ada data supervisi untuk madrasah ini.');return
 var pengawas=getPengawas();
 var madrasahList=getMadrasah();
 var madrasahObj=madrasahList.find(function(m){return m.nama===mName;})||{nama:mName};
+var sigP=getSigPerson(madrasahObj);
 var totalPct=0;var totalP=0;var totalL=0;var totalA=0;
 data.forEach(function(d){
 totalP+=calcKomponen(d,'perencanaan');
@@ -4412,8 +4414,8 @@ html+='<p style="text-align:center;font-size:14pt"><b>'+escHtml(madrasahObj.nama
 html+='<p style="text-align:center">Alamat: '+(madrasahObj.alamat||'..........................................')+'</p>';
 html+='<br><br><br>';
 html+='<p style="text-align:center">Disusun oleh:</p>';
-html+='<p style="text-align:center;font-size:13pt"><b>'+(pengawas.nama||'...............................')+'</b></p>';
-html+='<p style="text-align:center">NIP. '+(pengawas.nip||'...............................')+'</p>';
+html+='<p style="text-align:center;font-size:13pt"><b>'+(sigP.nama||'...............................')+'</b></p>';
+html+='<p style="text-align:center">NIP. '+(sigP.nip||'...............................')+'</p>';
 html+='<p style="text-align:center">'+getSigJabatan(pengawas)+'</p>';
 html+='</div>';
 // KATA PENGANTAR
@@ -4425,7 +4427,7 @@ html+='<p>Laporan ini disusun sebagai bentuk pertanggungjawaban pelaksanaan supe
 html+='<p>Pelaksanaan supervisi difokuskan pada keterlaksanaan pembelajaran yang mendorong murid berpikir kritis, kreatif, kolaboratif, komunikatif, reflektif, serta mengintegrasikan nilai cinta kepada Tuhan, sesama, lingkungan, bangsa, dan ilmu pengetahuan dalam proses pembelajaran.</p>';
 html+='<p>Kami berharap laporan ini dapat menjadi bahan refleksi, penguatan mutu layanan pendidikan, serta dasar penyusunan tindak lanjut peningkatan kompetensi guru dan kualitas pembelajaran di madrasah.</p>';
 html+='<p>Demikian laporan ini disusun. Semoga bermanfaat bagi peningkatan mutu pendidikan di madrasah.</p>';
-html+='<div class="ttd" style="margin-top:20px"><p style="margin:0">..................., .................... 2026</p><p style="margin:0">Penyusun,</p><br><br><br><p style="margin:0"><b><u>'+(pengawas.nama||'...........................')+'</u></b></p><p style="margin:0">NIP. '+(pengawas.nip||'...........................')+'</p></div>';
+html+='<div class="ttd" style="margin-top:20px"><p style="margin:0">..................., .................... 2026</p><p style="margin:0">Penyusun,</p><br><br><br><p style="margin:0"><b><u>'+(sigP.nama||'...........................')+'</u></b></p><p style="margin:0">NIP. '+(sigP.nip||'...........................')+'</p></div>';
 html+='</div>';
 // DAFTAR ISI
 html+='<div class="page-break"></div>';
@@ -4550,8 +4552,8 @@ html+='<div class="ttd" style="margin-top:20px">';
 html+='<p style="margin:0">..................., .................... 2026</p>';
 html+='<p style="margin:0">'+getSigRightLabel()+',</p>';
 html+='<br><br><br>';
-html+='<p style="margin:0"><b><u>'+(pengawas.nama||'...........................')+'</u></b></p>';
-html+='<p style="margin:0">NIP. '+(pengawas.nip||'...........................')+'</p>';
+html+='<p style="margin:0"><b><u>'+(sigP.nama||'...........................')+'</u></b></p>';
+html+='<p style="margin:0">NIP. '+(sigP.nip||'...........................')+'</p>';
 html+='</div></div>';
 // LAMPIRAN
 html+='<div class="page-break"></div>';
@@ -4589,6 +4591,8 @@ var avgL=data.length>0?(totalL/data.length):0;
 var avgA=data.length>0?(totalA/data.length):0;
 var avgPct=data.length>0?(totalPct/data.length):0;
 var firstMadrasah=madrasahList.length>0?madrasahList[0]:{};
+var sigP=getSigPerson(firstMadrasah);
+var coverInst=isKM()?(firstMadrasah.nama||''):(coverInst||'');
 var w=window.open('','_blank');
 var html='<html><head><title>Laporan Supervisi Pembelajaran</title><style>';
 html+='@page{size:A4;margin:2.5cm 2.5cm 3cm 2.5cm;@bottom-center{content:counter(page);font-size:10pt}}';
@@ -4622,11 +4626,11 @@ html+='<h1>LAPORAN</h1>';
 html+='<h1>SUPERVISI PEMBELAJARAN</h1>';
 html+='<h2>Tahun Ajaran ' + th.ta + '</h2>';
 html+='<br><br><br>';
-html+='<p style="text-align:center;font-size:14pt"><b>'+(pengawas.tempatTugas||'...............................')+'</b></p>';
+html+='<p style="text-align:center;font-size:14pt"><b>'+(coverInst||'...............................')+'</b></p>';
 html+='<br><br><br>';
 html+='<p style="text-align:center">Disusun oleh:</p>';
-html+='<p style="text-align:center;font-size:13pt"><b>'+(pengawas.nama||'...............................')+'</b></p>';
-html+='<p style="text-align:center">NIP. '+(pengawas.nip||'...............................')+'</p>';
+html+='<p style="text-align:center;font-size:13pt"><b>'+(sigP.nama||'...............................')+'</b></p>';
+html+='<p style="text-align:center">NIP. '+(sigP.nip||'...............................')+'</p>';
 html+='<p style="text-align:center">'+getSigJabatan(pengawas)+'</p>';
 html+='</div>';
 
@@ -4634,12 +4638,12 @@ html+='</div>';
 html+='<div class="page-break"></div>';
 html+='<div style="page-break-inside:avoid">';
 html+='<h2>KATA PENGANTAR</h2>';
-html+='<p>Puji syukur kehadirat Allah SWT atas rahmat dan karunia-Nya sehingga laporan hasil pelaksanaan supervisi pembelajaran berbasis Pembelajaran Mendalam (PM) dan Kurikulum Berbasis Cinta (KBC) di '+(pengawas.tempatTugas||'...........')+' dapat diselesaikan dengan baik.</p>';
+html+='<p>Puji syukur kehadirat Allah SWT atas rahmat dan karunia-Nya sehingga laporan hasil pelaksanaan supervisi pembelajaran berbasis Pembelajaran Mendalam (PM) dan Kurikulum Berbasis Cinta (KBC) di '+(coverInst||'...........')+' dapat diselesaikan dengan baik.</p>';
 html+='<p>Laporan ini disusun sebagai bentuk pertanggungjawaban pelaksanaan supervisi akademik dalam rangka penjaminan mutu pembelajaran yang berorientasi pada pembelajaran bermakna, penguatan karakter, pengembangan kompetensi abad ke-21, serta penumbuhan budaya belajar yang humanis, reflektif, dan berlandaskan nilai-nilai cinta.</p>';
 html+='<p>Pelaksanaan supervisi difokuskan pada keterlaksanaan pembelajaran yang mendorong murid berpikir kritis, kreatif, kolaboratif, komunikatif, reflektif, serta mengintegrasikan nilai cinta kepada Tuhan, sesama, lingkungan, bangsa, dan ilmu pengetahuan dalam proses pembelajaran.</p>';
 html+='<p>Kami berharap laporan ini dapat menjadi bahan refleksi, penguatan mutu layanan pendidikan, serta dasar penyusunan tindak lanjut peningkatan kompetensi guru dan kualitas pembelajaran di madrasah.</p>';
 html+='<p>Demikian laporan ini disusun. Semoga bermanfaat bagi peningkatan mutu pendidikan di madrasah.</p>';
-html+='<div class="ttd" style="margin-top:20px"><p style="margin:0">..................., .................... 2026</p><p style="margin:0">Penyusun,</p><br><br><br><p style="margin:0"><b><u>'+(pengawas.nama||'...........................')+'</u></b></p><p style="margin:0">NIP. '+(pengawas.nip||'...........................')+'</p></div>';
+html+='<div class="ttd" style="margin-top:20px"><p style="margin:0">..................., .................... 2026</p><p style="margin:0">Penyusun,</p><br><br><br><p style="margin:0"><b><u>'+(sigP.nama||'...........................')+'</u></b></p><p style="margin:0">NIP. '+(sigP.nip||'...........................')+'</p></div>';
 html+='</div>';
 
 
@@ -4868,8 +4872,8 @@ html+='<div class="ttd" style="margin-top:20px">';
 html+='<p style="margin:0">..................., .................... 2026</p>';
 html+='<p style="margin:0">'+getSigRightLabel()+',</p>';
 html+='<br><br><br>';
-html+='<p style="margin:0"><b><u>'+(pengawas.nama||'...........................')+'</u></b></p>';
-html+='<p style="margin:0">NIP. '+(pengawas.nip||'...........................')+'</p>';
+html+='<p style="margin:0"><b><u>'+(sigP.nama||'...........................')+'</u></b></p>';
+html+='<p style="margin:0">NIP. '+(sigP.nip||'...........................')+'</p>';
 html+='</div></div>';
 
 // LAMPIRAN
