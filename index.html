@@ -78,7 +78,9 @@ header p{opacity:.8;font-size:.85rem}
 .rekap-card h3{color:#0d9488;margin-bottom:10px}
 .rekap-score{font-size:2rem;font-weight:700;color:#0ea5e9}
 .rekap-predikat{display:inline-block;padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:600;margin-top:5px}
+.predikat-amat-baik{background:#d1fae5;color:#065f46}
 .predikat-sangat-baik{background:#d1fae5;color:#065f46}
+.predikat-sedang{background:#ede9fe;color:#5b21b6}
 .predikat-baik{background:#dbeafe;color:#1e40af}
 .predikat-cukup{background:#fef3c7;color:#92400e}
 .predikat-kurang{background:#fee2e2;color:#991b1b}
@@ -217,7 +219,9 @@ header p{opacity:.8;font-size:.85rem}
 .rekap-card h3{color:#0d9488;margin-bottom:10px}
 .rekap-score{font-size:2rem;font-weight:700;color:#0ea5e9}
 .rekap-predikat{display:inline-block;padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:600;margin-top:5px}
+.predikat-amat-baik{background:#d1fae5;color:#065f46}
 .predikat-sangat-baik{background:#d1fae5;color:#065f46}
+.predikat-sedang{background:#ede9fe;color:#5b21b6}
 .predikat-baik{background:#dbeafe;color:#1e40af}
 .predikat-cukup{background:#fef3c7;color:#92400e}
 .predikat-kurang{background:#fee2e2;color:#991b1b}
@@ -1700,7 +1704,7 @@ function getPengawas(){try{return JSON.parse(localStorage.getItem(PENGAWAS_KEY))
 function savePengawas(d){localStorage.setItem(PENGAWAS_KEY,JSON.stringify(d))}
 
 // ===== UTILITY =====
-function getPredikat(pct){if(pct>=91)return'Sangat Baik';if(pct>=81)return'Baik';if(pct>=71)return'Cukup';return'Kurang'}
+function getPredikat(pct){if(pct>=91)return'Amat Baik';if(pct>=76)return'Baik';if(pct>=61)return'Cukup';if(pct>=51)return'Sedang';return'Kurang'}
 function getAutoCatatan(skor){if(skor===null||skor===undefined)return'';return SKOR_CATATAN[skor]||''}
 function getPredikatClass(p){return'predikat-'+p.toLowerCase().replace(' ','-')}
 function calcTotal(d){let sum=0,max=0;['perencanaan','pelaksanaan','asesmen'].forEach(k=>{const scores=d[k]&&d[k].scores?d[k].scores:[];const itemCount=k==='pelaksanaan'?getIndikatorPelaksanaanFlat().length:getIndikator(k).length;const effectiveLen=Math.min(scores.length,itemCount);for(let i=0;i<effectiveLen;i++){const s=scores[i];if(s!==null&&s!==undefined){sum+=s+1;max+=4}}});return max>0?(sum/max)*100:0}
