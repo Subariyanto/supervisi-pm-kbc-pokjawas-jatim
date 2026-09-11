@@ -404,7 +404,9 @@ function renderSidebar(session){
     html+='</ul></li>';
     html+='<li class="submenu-toggle has-sub" onclick="toggleSubmenu(\'subhasil-km\')">&#128202; Hasil Supervisi &#9662;<ul class="submenu" id="subhasil-km">';
     html+=sSubItem('rekap','&#128202;','Rekap Hasil',state.view==='rekap');
+    html+=sSubItem('cetak','&#128424;','Cetak Hasil',state.view==='cetak');
     html+=sSubItem('rekap-ra','&#128202;','Rekap Hasil RA',state.view==='rekap-ra');
+    html+=sSubItem('cetak-ra','&#128424;','Cetak Hasil RA',state.view==='cetak-ra');
     html+='</ul></li>';
     html+=sMenuItem('program-supervisi','&#128198;','Program Supervisi',state.view==='program-supervisi');
     html+='<li onclick="navigate(\'laporan\')" data-nav="laporan">&#128196; Laporan</li>';
