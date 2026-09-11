@@ -329,6 +329,8 @@ function getCurrentRole(){
 function isAdmin(){return getCurrentRole()===ROLES.ADMIN;}
 function isPengawas(){return getCurrentRole()===ROLES.PENGAWAS;}
 function isKM(){return getCurrentRole()===ROLES.KM;}
+// Label kolom tanda tangan kanan mengikuti peran yang login (Kepala Madrasah saat login KM)
+function getSigRightLabel(){return isKM()?'Kepala Madrasah':'Pengawas Madrasah';}
 // Pengawas & Admin: akses penuh fitur supervisi + modul pengawas
 function isSupervisorLevel(){return isAdmin()||isPengawas();}
 
@@ -2368,6 +2370,7 @@ function renderIdentitas(){
 var id=state.formData.identitas||{};
 var isKm=isKM();
 if(isKm&&!id.namaMadrasah){id.namaMadrasah=getKMMadrasahNama()||'';}
+if(isKm&&!id.namaSupervisor){var kmM=getMadrasah().slice(0,1)[0]||{};var kmKepala=kmM.kepala||getSession().nama||'';if(kmKepala){id.namaSupervisor=kmKepala;id.nipSupervisor=kmM.nipKepala||'';}}
 if(isKm){var myM=getMadrasah().slice(0,1)[0];if(myM){if(!id.alamatMadrasah)id.alamatMadrasah=myM.alamat||'';if(!id.kabupatenKota)id.kabupatenKota=myM.kabupaten||'';}}
 var madrasahList=getMadrasah();
 var guruList=getGuru();
@@ -2762,7 +2765,9 @@ function newForm(){
 state.view=isRAJenjang()?'form-ra':'form';
 state.currentStep=0;state.editId=null;state.unlocked={perencanaan:{},pelaksanaan:{},asesmen:{}};
 var pengawas=getPengawas();
-state.formData={identitas:{namaSupervisor:pengawas.nama||'',nipSupervisor:pengawas.nip||'',jabatanSupervisor:pengawas.jabatan||''},perencanaan:{scores:[],catatan:[],manualCatatan:[]},pelaksanaan:{scores:[],catatan:[],manualCatatan:[]},asesmen:{scores:[],catatan:[],manualCatatan:[]},rekap:{}};
+var supNama=pengawas.nama||'';var supNip=pengawas.nip||'';
+if(isKM()){var kmM=getMadrasah().slice(0,1)[0]||{};supNama=kmM.kepala||getSession().nama||'';supNip=kmM.nipKepala||'';}
+state.formData={identitas:{namaSupervisor:supNama,nipSupervisor:supNip,jabatanSupervisor:pengawas.jabatan||''},perencanaan:{scores:[],catatan:[],manualCatatan:[]},pelaksanaan:{scores:[],catatan:[],manualCatatan:[]},asesmen:{scores:[],catatan:[],manualCatatan:[]},rekap:{}};
 render();
 }
 function backToDashboard(){state.view='dashboard';state.jenjang='umum';render()}
@@ -2923,10 +2928,10 @@ html+='<div style="margin-top:15px"><b>Rencana Tindak Lanjut:</b></div>';
 html+='<p style="text-align:justify;line-height:1.6;margin:5px 0">'+escHtml(rekapData.tindakLanjut)+'</p>';
 }
 html+='<table class="ttd-table"><tr>';
-html+='<td style="width:50%"><p>Guru Mata Pelajaran,</p><br><br><br>';
+html+='<td style="width:50%"><p>&nbsp;</p><p>Guru Mata Pelajaran,</p><br><br><br>';
 html+='<p style="font-weight:bold;text-decoration:underline;margin-bottom:0">'+(id.namaGuru||'.........................')+'</p>';
 html+='<p style="margin-top:0">NIP. '+(id.nipGuru||'.........................')+'</p></td>';
-html+='<td style="width:50%"><p>'+escHtml(getTempatTanggalCetak(id))+'</p><p>Pengawas Madrasah,</p><br><br><br>';
+html+='<td style="width:50%"><p>'+escHtml(getTempatTanggalCetak(id))+'</p><p>'+getSigRightLabel()+',</p><br><br><br>';
 html+='<p style="font-weight:bold;text-decoration:underline;margin-bottom:0">'+(id.namaSupervisor||'.........................')+'</p>';
 html+='<p style="margin-top:0">NIP. '+(id.nipSupervisor||'.........................')+'</p></td>';
 html+='</tr></table>';
@@ -2984,10 +2989,10 @@ html+='<p class="narasi">'+escHtml(rekapData.tindakLanjut)+'</p>';
 }
 });
 html+='<table class="ttd-table"><tr>';
-html+='<td style="width:50%"><p>Guru Mata Pelajaran,</p><br><br><br>';
+html+='<td style="width:50%"><p>&nbsp;</p><p>Guru Mata Pelajaran,</p><br><br><br>';
 html+='<p style="font-weight:bold;text-decoration:underline;margin-bottom:0">'+(id.namaGuru||'.........................')+'</p>';
 html+='<p style="margin-top:0">NIP. '+(id.nipGuru||'.........................')+'</p></td>';
-html+='<td style="width:50%"><p>'+escHtml(getTempatTanggalCetak(id))+'</p><p>Pengawas Madrasah,</p><br><br><br>';
+html+='<td style="width:50%"><p>'+escHtml(getTempatTanggalCetak(id))+'</p><p>'+getSigRightLabel()+',</p><br><br><br>';
 html+='<p style="font-weight:bold;text-decoration:underline;margin-bottom:0">'+(id.namaSupervisor||'.........................')+'</p>';
 html+='<p style="margin-top:0">NIP. '+(id.nipSupervisor||'.........................')+'</p></td>';
 html+='</tr></table>';
@@ -3054,13 +3059,13 @@ html+='<p style="text-align:justify;line-height:1.6;margin:5px 0">'+escHtml(reka
 // Tanda tangan
 html+='<table style="width:100%;border:none;margin-top:40px"><tr>';
 html+='<td style="border:none;width:50%;text-align:center;vertical-align:top">';
-html+='<p>Guru Mata Pelajaran,</p><br><br><br>';
+html+='<p>&nbsp;</p><p>Guru Mata Pelajaran,</p><br><br><br>';
 html+='<p style="font-weight:bold;text-decoration:underline;margin-bottom:0">'+(id.namaGuru||'.........................')+'</p>';
 html+='<p style="margin-top:0">NIP. '+(id.nipGuru||'.........................')+'</p>';
 html+='</td>';
 html+='<td style="border:none;width:50%;text-align:center;vertical-align:top">';
 html+='<p>'+escHtml(getTempatTanggalCetak(id))+'</p>';
-html+='<p>Pengawas Madrasah,</p><br><br><br>';
+html+='<p>'+getSigRightLabel()+',</p><br><br><br>';
 html+='<p style="font-weight:bold;text-decoration:underline;margin-bottom:0">'+(id.namaSupervisor||'.........................')+'</p>';
 html+='<p style="margin-top:0">NIP. '+(id.nipSupervisor||'.........................')+'</p>';
 html+='</td></tr></table>';
