@@ -424,10 +424,12 @@ function renderSidebar(session){
     html+=sSubItem('cetak','&#128424;','Cetak Hasil',state.view==='cetak');
     html+=sSubItem('rekap-ra','&#128202;','Rekap Hasil RA',state.view==='rekap-ra');
     html+=sSubItem('cetak-ra','&#128424;','Cetak Hasil RA',state.view==='cetak-ra');
-    html+=sSubItem('laporan-ra','&#128196;','Laporan RA',state.view==='laporan-ra');
     html+='</ul></li>';
     html+=sMenuItem('program-supervisi','&#128198;','Program Supervisi',state.view==='program-supervisi');
-    html+='<li onclick="navigate(\'laporan\')" data-nav="laporan">&#128196; Laporan</li>';
+    html+='<li class="submenu-toggle has-sub" onclick="toggleSubmenu(\'sublaporan-km\')">&#128196; Laporan &#9662;<ul class="submenu" id="sublaporan-km">';
+    html+=sSubItem('laporan','&#127979;','Laporan Madrasah',state.view==='laporan');
+    html+=sSubItem('laporan-ra','&#127793;','Laporan RA',state.view==='laporan-ra');
+    html+='</ul></li>';
   }
   html+='<li onclick="navigate(\'ubah-password\')" data-nav="ubah-password">&#128274; Ubah Password</li>';
   if(isSupervisorLevel()){
